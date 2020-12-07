@@ -126,7 +126,7 @@ body <- dashboardBody(
     ),
     column(width = 3,
       box(width = NULL, status = "warning",
-        textInput(inputId = "funcInput", label = "Please instert a funtion", value = 0),
+        textInput(inputId = "funcInput", label = "Please insert a function", value = 0),
         numericInput(inputId = "x0_val", label = "What is x0?", value = 1),
         numericInput(inputId = "x1_val", label = "What is x1? (if using bisection)", value = 2),
       ),
@@ -213,9 +213,16 @@ server <- function(input, output) {
       if(input$rootMethod == 3){
         root <- newtonraphson(fx_dfx,x_0)
       }
-      if(is.null(root)){
+      if(input$rootMethod == 2 && (x_0 == x_1 || x_1 < x_0)){
+        paste("<center> <h2> <b> Please make sure that x0 is less than x1 <b> <h2> <center>")
+      }
+      else if(input$rootMethod == 2 && (f(x_0) * f(x_1) > 0)){
+        paste("<center> <h2> <b> Please refter to the graph and make sure the root lies inbetween x0 and x1 <b> <h2> <center>")
+      }
+      else if(is.null(root)){
         paste("<center> <h2> <b> The Root Finding Method Failed <b> <h2> <center>")
-      }else{
+      }
+      else{
         paste("<center> <h2> <b> The root is ", root,"<b> <h2> <center>")
       }
       
@@ -224,7 +231,5 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 ```
-
-
 
 
