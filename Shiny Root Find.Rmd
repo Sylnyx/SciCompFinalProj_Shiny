@@ -112,8 +112,9 @@ newtonraphson <- function(ftn, x0, tol = 1e-9, max.iter = 100) {
 ```
 
 ```{r main}
+#header message
 header <- dashboardHeader(title = "Root Finding Methods")
-
+#layout of the dashoboard
 body <- dashboardBody(
   fluidRow(
     column(width = 9, height = 5,
@@ -139,7 +140,7 @@ body <- dashboardBody(
   )
   
 )
-
+#make the header purple and disable the side bar
 ui <- dashboardPage(
   skin = "purple",
   header,
@@ -149,26 +150,29 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  
+  #rendering the graph
   output$funcPlotOutput <- renderPlot({
+      #receiving the input values
       f_in <- input$funcInput
       x_0 <- input$x0_val
       x_1 <- input$x1_val
+      #parsing the given function from text to expression and getting the derivative of said expression
       d <- D(parse(text = f_in), "x")
+      #getting values for the graph render
       slide <- input$graphSlider
       marker <- input$marker
-      
+      #parsing the function from text to expression in a function
       f <- function(x){
         eval(parse(text = f_in))
       }
       
-
+      #f(x) and f'(x) for newton rhapson
       fx_dfx <- function(x){
         fx <- eval(parse(text = f_in))
         dfx <- eval(d)
         return(c(fx,dfx))
       }
-      
+      #determine which function to use based upon the chosen function
       if(input$rootMethod == 1){
         root <- fixedpoint(f,x_0)
       }
@@ -182,28 +186,32 @@ server <- function(input, output) {
     
     
     
-    
+    #rendering the graph based upon the given function and placing a line on the x
     p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
     p + stat_function(fun = f) + xlim(-(slide),slide) + geom_hline(yintercept=0, linetype="dashed") + geom_vline(xintercept=0, linetype="dashed") + geom_vline(xintercept=root, linetype="dashed", color="red") + geom_vline(xintercept=marker, linetype="dashed")
   })
   
   output$funcOutput <- renderText({
+      
+      #receiving the input values
       f_in <- input$funcInput
       x_0 <- input$x0_val
       x_1 <- input$x1_val
+      #parsing the given function from text to expression and getting the derivative of said expression
       d <- D(parse(text = f_in), "x")
       
+      #parsing the function from text to expression in a function
       f <- function(x){
         eval(parse(text = f_in))
       }
       
-
+      #f(x) and f'(x) for newton rhapson
       fx_dfx <- function(x){
         fx <- eval(parse(text = f_in))
         dfx <- eval(d)
         return(c(fx,dfx))
       }
-      
+      #determine which function to use based upon the chosen function
       if(input$rootMethod == 1){
         root <- fixedpoint(f,x_0)
       }
@@ -213,12 +221,15 @@ server <- function(input, output) {
       if(input$rootMethod == 3){
         root <- newtonraphson(fx_dfx,x_0)
       }
+      #make sure the given x values are good
       if(input$rootMethod == 2 && (x_0 == x_1 || x_1 < x_0)){
         paste("<center> <h2> <b> Please make sure that x0 is less than x1 <b> <h2> <center>")
       }
+      #make sure the root lies in the given bisection
       else if(input$rootMethod == 2 && (f(x_0) * f(x_1) > 0)){
-        paste("<center> <h2> <b> Please refter to the graph and make sure the root lies inbetween x0 and x1 <b> <h2> <center>")
+        paste("<center> <h2> <b> Please refer to the graph and make sure the root lies in between x0 and x1 <b> <h2> <center>")
       }
+      #if there is no found root return an error
       else if(is.null(root)){
         paste("<center> <h2> <b> The Root Finding Method Failed <b> <h2> <center>")
       }
